@@ -1,5 +1,6 @@
 const express     = require('express');
 const http        = require('http');
+const https       = require('https');
 const morgan      = require('morgan');
 const chalk       = require('chalk');
 const path        = require('path')
@@ -8,7 +9,10 @@ const favicon     = require('serve-favicon');
 const bodyParser  = require('body-parser');
 const JsonResult  = require('./Class/JsonResult');
 const app         = express();
-
+const options     = {
+  key:  fs.readFileSync('./keys/private.pem'),
+  cert: fs.readFileSync('./keys/public.pem')
+};
 
 // setup morgan
 morgan.token('logDate', function (req, res) { return new Date(); });
@@ -92,7 +96,12 @@ function normalizePort(val) {
 }
 
 var port      = normalizePort(process.env.PORT || '13000');
+var httpsPort = 443;
 
 http.createServer(app).listen(port, function() {
   console.log("HTTP server listening on port " + port);
+});
+
+https.createServer(options, app).listen(httpsPort, function() {
+  console.log("HTTPS server listening on port " + httpsPort);
 });
