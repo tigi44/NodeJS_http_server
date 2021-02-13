@@ -3,7 +3,7 @@
 - [PM2](https://www.npmjs.com/package/pm2)
 - [express](https://www.npmjs.com/package/express)
 
-# API Server & WebPage Server
+# JSON API & WebPage Server
 ### Reqeust Headers
 - Content-Type : application/json -> return JSON Result
 - The others Content-Type -> return WebPage
@@ -32,21 +32,28 @@ module.exports = {
 ```js
 ...
 "scripts": {
+  "test": "mocha",
   "dev": "pm2-dev start ecosystem.config.js",
+  "dev-start": "pm2 startOrRestart ecosystem.config.js --watch --env development && pm2 log nodejs_http_server",
   "start": "pm2 startOrRestart ecosystem.config.js --env production",
   "deploy": "npm install && npm run start"
 },
 ...
 ```
-##### - ENV development
-- http port  : 13000
+- Unit Test ([mocha](https://www.npmjs.com/package/mocha))
+```shell
+$ npm run test
+```
+
+- ENV development
 ```shell
 $ npm install
 $ npm run dev
+or
+$ npm run dev-start
 ```
 
-##### - ENV production
-- http port  : 80
+- ENV production
 ```shell
 $ npm install
 $ npm run start

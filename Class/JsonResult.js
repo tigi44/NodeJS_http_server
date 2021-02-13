@@ -1,28 +1,26 @@
-function JsonResult(code, message) {
- this.code = code;
- this.message = message;
-};
+class JsonResult {
+  constructor(code, message) {
+    this.code = code;
+    this.message = message;
+  }
 
-var proto = JsonResult.prototype;
+  json() {
+     return {"code": this.code, "message": this.message};
+  }
 
-proto.setCode = function(code){
- this.code = code;
-};
+  json(data) {
+     return {"code": this.code, "message": this.message, "data": data};
+  }
 
-proto.getCode = function() {
- return this.code;
-};
+  static success() {
+    const success = new JsonResult(0, "success")
+    return success
+  }
 
-proto.setMessage = function(message) {
- this.message = message;
-};
-
-proto.getMessage = function() {
- return this.message;
-};
-
-proto.json = function () {
-   return {"code": this.code, "message": this.message};
-};
+  static fail(message) {
+    const fail = new JsonResult(-1, message ? message : "fail")
+    return fail
+  }
+}
 
 module.exports = JsonResult;

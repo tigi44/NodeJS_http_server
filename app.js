@@ -1,18 +1,15 @@
 const express     = require('express');
-const http        = require('http');
-const morgan      = require('morgan');
-const chalk       = require('chalk');
 const path        = require('path')
 const fs          = require('fs');
 const favicon     = require('serve-favicon');
 const bodyParser  = require('body-parser');
+
+const server      = require('./Modules/Server');
+const requestLog  = require('./Modules/RequestLog');
+const errorHandler= require('./Modules/ErrorHandler');
+
 const JsonResult  = require('./Class/JsonResult');
 const app         = express();
-
-
-// setup morgan
-morgan.token('logDate', function (req, res) { return new Date(); });
-morgan.token('body', function (req, res) { return JSON.stringify(req.body); });
 
 // setup view engine
 app.set('views', path.join(__dirname, 'views'));
@@ -21,78 +18,31 @@ app.set('view engine', 'ejs');
 // app use
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(requestLog);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(morgan(setupMorgan));
 app.get("/", index);
-app.use(errorNotFound);
-app.use(errorHandler);
+app.use(errorHandler.errorNotFound);
+app.use(errorHandler.errorHandler);
 
-// function
-function setupMorgan(tokens, req, res) {
-  if (res.statusCode != 200) return;
+module.exports = server.createHTTP(app);
 
-  return [
-    chalk['bgGreen']('[' + tokens.logDate(req, res) + ']'),
-    chalk['blue'].bold(tokens.body(req, res))
-  ].join(' ');
-}
 
+// functions
 function index(req, res, next) {
   var contentType = req.headers['content-type'];
 
   if (contentType == 'application/json') {
 
-    var jsonResult = new JsonResult(0, "success");
-    res.json(jsonResult.json());
+    var jsonResult = JsonResult.success();
+    var resultData = {"test": "testdata"}
+    res.json(jsonResult.json(resultData));
   } else {
 
     let renderView = req.path
     renderView = renderView.replace("/", "")
-    res.render(renderView);
+    res.render(renderView, {
+      title: "test page"
+    });
   }
 }
-
-function errorNotFound(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404
-  next(err);
-}
-
-function errorHandler(err, req, res, next) {
-  var contentType = req.headers['content-type'];
-
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  res.status(err.status || 500);
-  if (contentType == 'application/json') {
-
-    var jsonResult = new JsonResult(err.status, err.message);
-    res.json(jsonResult);
-  } else {
-
-    res.render('error');
-  }
-}
-
-// server http / https
-function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    return val;
-  }
-
-  if (port >= 0) {
-    return port;
-  }
-
-  return false;
-}
-
-var port      = normalizePort(process.env.PORT || '13000');
-
-http.createServer(app).listen(port, function() {
-  console.log("HTTP server listening on port " + port);
-});
