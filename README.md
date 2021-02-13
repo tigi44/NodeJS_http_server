@@ -1,3 +1,5 @@
+![Nodejs CI](https://github.com/tigi44/NodeJS_http_server/workflows/Node.js%20CI/badge.svg)
+
 # NodeJS_http_server
 
 - [PM2](https://www.npmjs.com/package/pm2)
